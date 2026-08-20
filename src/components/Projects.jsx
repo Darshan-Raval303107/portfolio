@@ -11,7 +11,7 @@ const Projects = () => {
       category: 'Full Stack Web App',
       description: 'An interactive restaurant management system enabling smooth order tracking, real-time table occupancy dashboards, menu updating, and invoice generation workflows.',
       imageClass: 'proj-vinod',
-      tags: ['React', 'Node.js', 'Express', 'MongoDB', 'CSS Modules'],
+      tags: ['React', 'Python', 'Flask', 'NeonDB', 'CSS Modules'],
       liveLink: 'https://vinod-dinig-hall.vercel.app/window',
       icon: Utensils,
     },

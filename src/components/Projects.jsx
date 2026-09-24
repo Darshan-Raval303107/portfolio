@@ -1,104 +1,158 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ExternalLink, Github, Utensils } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ExternalLink, Github, Search, X } from 'lucide-react';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 import './Projects.css';
 
+// GitHub username to fetch repositories for
+const GITHUB_USERNAME = 'Darshan-Raval303107';
+
 const Projects = () => {
-  const projects = [
-    {
-      id: 1,
-      title: 'Vinod Dining Hall',
-      category: 'Full Stack Web App',
-      description: 'An interactive restaurant management system enabling smooth order tracking, real-time table occupancy dashboards, menu updating, and invoice generation workflows.',
-      imageClass: 'proj-vinod',
-      tags: ['React', 'Python', 'Flask', 'NeonDB', 'CSS Modules'],
-      liveLink: 'https://vinod-dinig-hall.vercel.app/window',
-      icon: Utensils,
-    },
-  ];
+  // State variables for repositories, search input, loading status, and error
+  const [repos, setRepos] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Function to fetch repositories from GitHub REST API
+  const fetchRepositories = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
+      const response = await fetch(
+        `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch repositories (Status: ${response.status})`);
+      }
+
+      const data = await response.json();
+      setRepos(data);
+    } catch (err) {
+      setError(err.message || 'Something went wrong while fetching data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-  };
+  // Fetch repositories once when component mounts
+  useEffect(() => {
+    fetchRepositories();
+  }, []);
+
+  // Filter repositories based on search term (matches name, language, or description)
+  const filteredRepos = repos.filter((repo) => {
+    const query = searchTerm.toLowerCase();
+    const nameMatches = repo.name.toLowerCase().includes(query);
+    const langMatches = repo.language && repo.language.toLowerCase().includes(query);
+    const descMatches = repo.description && repo.description.toLowerCase().includes(query);
+    return nameMatches || langMatches || descMatches;
+  });
 
   return (
-    <motion.section
-      className="projects-section"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <section className="projects-section">
+      {/* Header */}
       <div className="section-header text-center">
-        <h2 className="section-title">My <span className="gradient-text">Projects</span></h2>
+        <h2 className="section-title">
+          My <span className="gradient-text">Projects</span>
+        </h2>
       </div>
 
-      <motion.div 
-        className="projects-grid"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
-        {projects.map((project) => {
-          const IconComponent = project.icon;
-          return (
-            <motion.div 
-              key={project.id} 
-              className="project-card glass-card"
-              variants={itemVariants}
+      {/* Search Bar */}
+      <div className="search-container">
+        <div className="search-bar">
+          <Search className="search-icon" size={18} />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search projects by name or language (e.g. JavaScript, LeetCode)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="clear-search-btn"
+              onClick={() => setSearchTerm('')}
+              title="Clear search"
             >
-              {/* Card visual header */}
-              <div className="project-banner">
-                <div className="banner-overlay" />
-                <div className="project-icon-box">
-                  <IconComponent size={28} />
-                </div>
-                <span className="project-category">{project.category}</span>
-              </div>
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        {!loading && !error && (
+          <p className="search-count">
+            Showing {filteredRepos.length} of {repos.length} repositories
+          </p>
+        )}
+      </div>
 
-              {/* Card content */}
-              <div className="project-details">
-                <h3 className="project-title">{project.title}</h3>
-                <p className="project-description">{project.description}</p>
-                
-                {/* Tech tags */}
-                <div className="project-tags">
-                  {project.tags.map((tag, idx) => (
-                    <span key={idx} className="project-tag-badge">{tag}</span>
-                  ))}
-                </div>
+      {/* 1. Loading Spinner while request is in progress */}
+      {loading && <LoadingSpinner />}
 
-                {/* Actions */}
-                <div className="project-links">
-                  {project.githubLink && (
-                    <a href={project.githubLink} className="proj-link-btn outline-btn" aria-label="GitHub Repository">
-                      <Github size={16} /> Code
-                    </a>
-                  )}
-                  {project.liveLink && (
-                    <a href={project.liveLink} target="_blank" rel="noreferrer" className="proj-link-btn solid-btn" aria-label="Live Demo">
-                      <ExternalLink size={16} /> Live Demo
-                    </a>
-                  )}
+      {/* 2. Error Message if API call fails */}
+      {!loading && error && (
+        <ErrorMessage message={error} onRetry={fetchRepositories} />
+      )}
+
+      {/* 3. Repositories Grid */}
+      {!loading && !error && (
+        <>
+          {filteredRepos.length > 0 ? (
+            <div className="projects-grid">
+              {filteredRepos.map((repo) => (
+                <div key={repo.id} className="project-card glass-card">
+                  <div className="project-details">
+                    <div className="repo-header">
+                      <h3 className="project-title">{repo.name}</h3>
+                      {repo.language && (
+                        <span className="project-tag-badge">{repo.language}</span>
+                      )}
+                    </div>
+
+                    <p className="project-description">
+                      {repo.description || 'No description available for this repository.'}
+                    </p>
+
+                    {/* Repository Links */}
+                    <div className="project-links">
+                      <a
+                        href={repo.html_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="proj-link-btn solid-btn"
+                      >
+                        <Github size={16} /> View Repo
+                      </a>
+                      {repo.homepage && (
+                        <a
+                          href={repo.homepage}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="proj-link-btn outline-btn"
+                        >
+                          <ExternalLink size={16} /> Live Demo
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-    </motion.section>
+              ))}
+            </div>
+          ) : (
+            <div className="no-results glass-card">
+              <p className="no-results-text">
+                No projects found matching "<strong>{searchTerm}</strong>"
+              </p>
+              <button className="clear-btn" onClick={() => setSearchTerm('')}>
+                Clear Search
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </section>
   );
 };
 

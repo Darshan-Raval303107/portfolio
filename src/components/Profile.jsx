@@ -64,23 +64,6 @@ const Profile = ({ setActiveTab }) => {
             </button>
           </div>
         </div>
-
-        {/* Right column: Graphic/Interactive Element */}
-        <div className="profile-visual-card">
-          <div className="visual-background-shapes">
-            <div className="glow-circle blue-glow"></div>
-            <div className="glow-circle pink-glow"></div>
-          </div>
-          <div className="profile-hero-frame">
-            <div className="avatar-placeholder">
-              <span className="avatar-initials">RD</span>
-            </div>
-            <div className="tech-tag tag-react">React</div>
-            <div className="tech-tag tag-js">JavaScript</div>
-            <div className="tech-tag tag-node">Node.js</div>
-            <div className="tech-tag tag-css">CSS3</div>
-          </div>
-        </div>
       </div>
     </motion.section>
   );

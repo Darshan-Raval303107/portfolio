@@ -71,6 +71,11 @@ const Footer = ({ setActiveTab }) => {
                 </button>
               </li>
               <li>
+                <button onClick={() => { setActiveTab('Todo App'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="footer-link-btn">
+                  Todo App
+                </button>
+              </li>
+              <li>
                 <button onClick={() => { setActiveTab('Contact Me'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="footer-link-btn">
                   Contact Me
                 </button>

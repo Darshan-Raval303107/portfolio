@@ -6,6 +6,7 @@ import Profile from './components/Profile';
 import About from './components/About';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
+import TodoApp from './components/TodoApp';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('Profile');
@@ -17,7 +18,9 @@ const App = () => {
       case 'About Me':
         return <About key="about" />;
       case 'Projects':
-        return <Projects key="projects" />;
+        return <Projects key="projects" setActiveTab={setActiveTab} />;
+      case 'Todo App':
+        return <TodoApp key="todo" />;
       case 'Contact Me':
         return <Contact key="contact" />;
       default:

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Info, FolderGit2, Mail, Menu, X } from 'lucide-react';
+import { User, Info, FolderGit2, Mail, CheckSquare, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = ({ activeTab, setActiveTab }) => {
@@ -10,6 +10,7 @@ const Navbar = ({ activeTab, setActiveTab }) => {
     { id: 'Profile', label: 'Profile', icon: User },
     { id: 'About Me', label: 'About Me', icon: Info },
     { id: 'Projects', label: 'Projects', icon: FolderGit2 },
+    { id: 'Todo App', label: 'Todo App', icon: CheckSquare },
     { id: 'Contact Me', label: 'Contact Me', icon: Mail },
   ];
 

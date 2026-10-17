@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Info, FolderGit2, Mail, CheckSquare, Menu, X } from 'lucide-react';
+import { User, Info, FolderGit2, Mail, CheckSquare, Menu, X, LogOut, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentUser, isAuthenticated, logout } = useAuth();
 
   const navItems = [
     { id: 'Profile', label: 'Profile', icon: User },
@@ -23,6 +25,7 @@ const Navbar = ({ activeTab, setActiveTab }) => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
+          onClick={() => setActiveTab('Profile')}
         >
           <span className="logo-symbol">&lt;/&gt;</span>
           <span className="logo-text">Darshan<span className="logo-text-gradient">.Dev</span></span>
@@ -51,6 +54,35 @@ const Navbar = ({ activeTab, setActiveTab }) => {
               </button>
             );
           })}
+        </div>
+
+        {/* Desktop Auth Controls */}
+        <div className="navbar-desktop-auth">
+          {isAuthenticated ? (
+            <div className="navbar-auth-actions">
+              <span className="navbar-user-chip" title={currentUser?.email || ''}>
+                <User size={14} className="user-icon" />
+                <span className="user-name">{currentUser?.username || currentUser?.email}</span>
+              </span>
+              <button
+                onClick={() => logout('You have been logged out.')}
+                className="nav-logout-btn"
+                title="Log Out"
+              >
+                <LogOut size={15} />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setActiveTab('Todo App')}
+              className="nav-login-btn"
+              title="Sign In to Task Manager"
+            >
+              <LogIn size={15} />
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
 
         {/* Mobile Toggle Button */}
@@ -90,6 +122,32 @@ const Navbar = ({ activeTab, setActiveTab }) => {
                   </button>
                 );
               })}
+
+              <div className="mobile-auth-divider" />
+
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    logout('You have been logged out.');
+                    setIsOpen(false);
+                  }}
+                  className="mobile-nav-item-btn mobile-logout-btn"
+                >
+                  <LogOut size={18} className="nav-item-icon" />
+                  <span>Logout ({currentUser?.username || 'User'})</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setActiveTab('Todo App');
+                    setIsOpen(false);
+                  }}
+                  className="mobile-nav-item-btn mobile-login-btn"
+                >
+                  <LogIn size={18} className="nav-item-icon" />
+                  <span>Sign In</span>
+                </button>
+              )}
             </div>
           </motion.div>
         )}

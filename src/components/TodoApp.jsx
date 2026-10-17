@@ -19,24 +19,44 @@ import {
   Flag,
   ListTodo,
   CheckCheck,
-  Clock
+  Clock,
+  User as UserIcon,
+  ShieldCheck
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './TodoApp.css';
 
 const API_URL = '/api/tasks';
 const FALLBACK_URL = 'http://localhost:5001/api/tasks';
 
-const apiFetch = async (endpoint = '', options = {}) => {
-  try {
-    const res = await fetch(`${API_URL}${endpoint}`, options);
-    if (res.ok) return res;
-    return await fetch(`${FALLBACK_URL}${endpoint}`, options);
-  } catch {
-    return await fetch(`${FALLBACK_URL}${endpoint}`, options);
-  }
-};
-
 export default function TodoApp() {
+  const { token, currentUser, logout } = useAuth();
+
+  const apiFetch = async (endpoint = '', options = {}) => {
+    const headers = {
+      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    };
+
+    const requestOptions = {
+      ...options,
+      headers
+    };
+
+    let res;
+    try {
+      res = await fetch(`${API_URL}${endpoint}`, requestOptions);
+    } catch {
+      res = await fetch(`${FALLBACK_URL}${endpoint}`, requestOptions);
+    }
+
+    if (res && res.status === 401) {
+      logout('Your session has expired. Please log in again.');
+    }
+
+    return res;
+  };
+
   const [tasks, setTasks] = useState([]);
   const [inputTitle, setInputTitle] = useState('');
   const [inputDescription, setInputDescription] = useState('');
@@ -73,7 +93,7 @@ export default function TodoApp() {
       if (res && res.ok) {
         const data = await res.json();
         setTasks(data);
-        setDbStatus('Connected to MongoDB (AWDF_PR)');
+        setDbStatus('Connected to MongoDB (AWDF_PR_7)');
         if (isManual) {
           showToast('Tasks refreshed from MongoDB!', 'success');
         }
@@ -139,7 +159,7 @@ export default function TodoApp() {
         setTasks((prev) =>
           prev.map((t) => (t.id === tempId || t._id === tempId ? serverTask : t))
         );
-        showToast(`Task created with ${priority} priority in AWDF_PR!`, 'success');
+        showToast(`Task created with ${priority} priority in AWDF_PR_7!`, 'success');
       } else {
         throw new Error('Server rejected task creation');
       }
@@ -217,7 +237,7 @@ export default function TodoApp() {
         setEditingTitle('');
         setEditingDescription('');
         setEditingPriority('Low');
-        showToast('Task updated successfully in AWDF_PR!', 'success');
+        showToast('Task updated successfully in AWDF_PR_7!', 'success');
       } else {
         throw new Error('Update failed');
       }
@@ -242,7 +262,7 @@ export default function TodoApp() {
 
       if (res && res.ok) {
         setTasks((prev) => prev.filter((t) => (t.id || t._id) !== id));
-        showToast('Task deleted from AWDF_PR database!', 'info');
+        showToast('Task deleted from AWDF_PR_7 database!', 'info');
         setDeletingTask(null);
       } else {
         throw new Error('Delete failed');
@@ -309,7 +329,7 @@ export default function TodoApp() {
                 <br />
                 <strong className="delete-task-preview">"{deletingTask.title}"</strong>
                 <br />
-                This will permanently remove the document from the <strong>AWDF_PR</strong> MongoDB database.
+                This will permanently remove the document from the <strong>AWDF_PR_7</strong> MongoDB database.
               </p>
               <div className="modal-actions">
                 <button 
@@ -355,11 +375,16 @@ export default function TodoApp() {
           <Server size={14} /> Port: 5001
         </span>
         <span className="badge db-badge">
-          <Database size={14} /> DB: AWDF_PR
+          <Database size={14} /> DB: AWDF_PR_7
         </span>
         <span className="badge status-badge">
           {dbStatus}
         </span>
+        {currentUser && (
+          <span className="badge user-badge" style={{ borderColor: 'rgba(168, 85, 247, 0.4)', color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <UserIcon size={14} /> {currentUser.username || currentUser.email}
+          </span>
+        )}
         <button onClick={() => fetchTasks(true)} className="refresh-btn" title="Refresh Tasks from MongoDB">
           <RefreshCw size={13} className={loading ? 'spinning' : ''} />
         </button>
@@ -449,7 +474,7 @@ export default function TodoApp() {
           {loading && tasks.length === 0 ? (
             <div className="todo-loading">
               <Loader2 size={24} className="spinning loading-icon" />
-              <p>Fetching tasks from AWDF_PR database...</p>
+              <p>Fetching tasks from AWDF_PR_7 database...</p>
             </div>
           ) : (
             <ul className="task-list">
@@ -615,7 +640,7 @@ export default function TodoApp() {
 
           {!loading && tasks.length === 0 && (
             <div className="empty-msg">
-              <p>No tasks found in <strong>AWDF_PR</strong> database.</p>
+              <p>No tasks found in <strong>AWDF_PR_7</strong> database.</p>
               <p className="empty-sub">Type a task title, select priority, and click <strong>Add Task</strong>!</p>
             </div>
           )}

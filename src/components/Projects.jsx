@@ -23,12 +23,19 @@ const Projects = ({ setActiveTab }) => {
     try {
       setLoading(true);
       setError(null);
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
       let res;
       try {
-        res = await fetch(API_URL);
-        if (!res.ok) res = await fetch(FALLBACK_URL);
+        res = await fetch(API_URL, { headers });
+        if (!res.ok && res.status !== 401) res = await fetch(FALLBACK_URL, { headers });
       } catch {
-        res = await fetch(FALLBACK_URL);
+        res = await fetch(FALLBACK_URL, { headers });
+      }
+
+      if (res.status === 401) {
+        throw new Error('Authentication required. Please log in via the Todo App tab to view backend tasks.');
       }
 
       if (!res.ok) {
@@ -107,7 +114,7 @@ const Projects = ({ setActiveTab }) => {
         </h2>
         <p className="section-subtitle">
           {dataSource === 'backend'
-            ? 'Displaying dynamic task records fetched live from your Node+MongoDB backend (DB: AWDF_PR)'
+            ? 'Displaying dynamic task records fetched live from your Node+MongoDB backend (DB: AWDF_PR_7)'
             : 'Displaying repositories fetched from GitHub REST API (Practical 3)'}
         </p>
 
@@ -209,7 +216,7 @@ const Projects = ({ setActiveTab }) => {
 
                         <p className="project-description task-meta-info">
                           <span>
-                            <strong>DB:</strong> AWDF_PR
+                            <strong>DB:</strong> AWDF_PR_7
                           </span>{' '}
                           &bull;{' '}
                           <span>
@@ -237,7 +244,7 @@ const Projects = ({ setActiveTab }) => {
             ) : (
               <div className="no-results glass-card">
                 <p className="no-results-text">
-                  No tasks found in <strong>AWDF_PR</strong> database matching "
+                  No tasks found in <strong>AWDF_PR_7</strong> database matching "
                   <strong>{searchTerm}</strong>"
                 </p>
                 <button className="clear-btn" onClick={() => setSearchTerm('')}>
